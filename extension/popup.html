@@ -29,17 +29,22 @@
     }
     button.secondary { background: #273340; color: #e7e9ea; }
     button.danger { background: transparent; color: #f4212e; }
+    button:disabled { background: #16181c; color: #00ba7c; cursor: default; }
     #status { font-size: 11px; color: #71767b; min-height: 14px; }
+    .total { font-size: 12px; color: #71767b; }
+    .label { font-size: 11px; color: #71767b; text-transform: uppercase; letter-spacing: 0.5px; }
   </style>
 </head>
 <body>
   <h1>X Bookmarks Exporter</h1>
-  <div class="count" id="count">0</div>
+  <div class="label">Pendientes de sincronizar</div>
+  <div class="count" id="pending">0</div>
+  <div class="total" id="total">0 capturados en total</div>
   <div class="hint">
     Abre <strong>x.com/i/bookmarks</strong> y haz scroll hasta el final.
-    Los tweets se capturan automáticamente.
+    Los tweets se capturan y sincronizan automáticamente.
   </div>
-  <button id="send">Enviar al servidor</button>
+  <button id="send">Sincronizar pendientes</button>
   <button id="export" class="secondary">Descargar JSON</button>
   <button id="clear" class="danger">Vaciar capturados</button>
   <div id="status"></div>

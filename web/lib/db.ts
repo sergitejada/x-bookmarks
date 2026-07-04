@@ -5,6 +5,9 @@ export type MediaItem = {
   type: "photo" | "video" | "animated_gif";
   url: string;
   video_url: string | null;
+  /** Nombre de fichero en web/media/ una vez descargado */
+  local?: string | null;
+  local_video?: string | null;
 };
 
 export type Tweet = {
@@ -14,6 +17,7 @@ export type Tweet = {
   author_handle: string;
   author_name: string;
   author_avatar: string;
+  author_avatar_local: string | null;
   created_at: string | null;
   likes: number;
   retweets: number;
@@ -44,6 +48,13 @@ function createDb() {
     CREATE INDEX IF NOT EXISTS idx_tweets_author ON tweets(author_handle);
     CREATE INDEX IF NOT EXISTS idx_tweets_created ON tweets(created_at);
   `);
+  // Migración para bases de datos creadas antes de la descarga de media
+  const cols = (db.prepare("PRAGMA table_info(tweets)").all() as { name: string }[]).map(
+    (c) => c.name
+  );
+  if (!cols.includes("author_avatar_local")) {
+    db.exec("ALTER TABLE tweets ADD COLUMN author_avatar_local TEXT");
+  }
   return db;
 }
 
@@ -135,7 +146,7 @@ export function searchTweets(opts: { q?: string; author?: string }): Tweet[] {
   const rows = db
     .prepare(
       `SELECT id, url, text, author_handle, author_name, author_avatar,
-              created_at, likes, retweets, media, saved_at
+              author_avatar_local, created_at, likes, retweets, media, saved_at
        FROM tweets ${where}
        ORDER BY created_at DESC
        LIMIT 500`

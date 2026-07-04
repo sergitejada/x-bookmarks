@@ -1,4 +1,6 @@
-const countEl = document.getElementById('count');
+const pendingEl = document.getElementById('pending');
+const totalEl = document.getElementById('total');
+const sendBtn = document.getElementById('send');
 const statusEl = document.getElementById('status');
 
 function setStatus(text) {
@@ -7,18 +9,23 @@ function setStatus(text) {
 
 async function refresh() {
   const state = await chrome.runtime.sendMessage({ type: 'GET_STATE' });
-  countEl.textContent = state.count;
+  pendingEl.textContent = state.pending;
+  totalEl.textContent = `${state.total} capturados en total`;
+  sendBtn.disabled = state.pending === 0;
+  sendBtn.textContent =
+    state.pending === 0 ? 'Todo sincronizado ✓' : `Sincronizar ${state.pending} pendientes`;
   if (state.lastSync?.error) {
     setStatus('Último envío falló: ¿está el servidor en :3005?');
   } else if (state.lastSync?.at) {
-    setStatus(`Último envío: ${new Date(state.lastSync.at).toLocaleTimeString()}`);
+    setStatus(`Última sync: ${new Date(state.lastSync.at).toLocaleTimeString()}`);
   }
 }
 
-document.getElementById('send').addEventListener('click', async () => {
-  setStatus('Enviando…');
+sendBtn.addEventListener('click', async () => {
+  setStatus('Sincronizando…');
   const result = await chrome.runtime.sendMessage({ type: 'SEND_TO_SERVER' });
-  setStatus(result.ok ? `Enviados ${result.sent} tweets ✓` : `Error: ${result.error}`);
+  await refresh();
+  setStatus(result.ok ? `Sincronizados ${result.sent} tweets ✓` : `Error: ${result.error}`);
 });
 
 document.getElementById('export').addEventListener('click', async () => {

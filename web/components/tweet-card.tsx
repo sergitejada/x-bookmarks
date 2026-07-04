@@ -1,5 +1,9 @@
 import type { Tweet } from "@/lib/db";
 
+function localUrl(filename: string | null | undefined, fallback: string | null) {
+  return filename ? `/api/media/${filename}` : fallback;
+}
+
 function formatDate(iso: string | null) {
   if (!iso) return "";
   return new Date(iso).toLocaleDateString("es-ES", {
@@ -19,10 +23,10 @@ export function TweetCard({ tweet }: { tweet: Tweet }) {
   return (
     <article className="rounded-2xl border border-[#2f3336] bg-[#16181c] p-4 transition-colors hover:border-[#536471]">
       <div className="flex items-start gap-3">
-        {tweet.author_avatar ? (
+        {tweet.author_avatar || tweet.author_avatar_local ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={tweet.author_avatar}
+            src={localUrl(tweet.author_avatar_local, tweet.author_avatar)!}
             alt=""
             className="h-10 w-10 shrink-0 rounded-full"
           />
@@ -52,11 +56,11 @@ export function TweetCard({ tweet }: { tweet: Tweet }) {
               }`}
             >
               {tweet.media.map((m, i) =>
-                m.video_url ? (
+                m.video_url || m.local_video ? (
                   <video
                     key={i}
-                    src={m.video_url}
-                    poster={m.url}
+                    src={localUrl(m.local_video, m.video_url)!}
+                    poster={localUrl(m.local, m.url) ?? undefined}
                     controls
                     preload="none"
                     className="max-h-96 w-full bg-black object-contain"
@@ -65,7 +69,7 @@ export function TweetCard({ tweet }: { tweet: Tweet }) {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     key={i}
-                    src={m.url}
+                    src={localUrl(m.local, m.url)!}
                     alt=""
                     loading="lazy"
                     className="max-h-96 w-full object-cover"
