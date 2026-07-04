@@ -50,8 +50,10 @@ pnpm dev        # http://localhost:3005
 
 - Los tweets se guardan **completos** (texto, media, JSON crudo), no solo la
   URL — si el tweet se borra o la cuenta desaparece, tu copia sobrevive.
-- Las imágenes/vídeos se sirven desde los CDN de Twitter (`pbs.twimg.com`);
-  si quieres archivo 100% offline, el siguiente paso sería descargar la media.
+- Las imágenes, vídeos y avatares se **descargan a `web/media/`** en segundo
+  plano al ingerir cada lote, y la UI los sirve desde `/api/media/<fichero>`
+  (con fallback al CDN si alguna descarga falló). Para forzar la descarga de
+  lo que falte: `curl -X POST http://localhost:3005/api/media/backfill`.
 - El endpoint GraphQL interno de X cambia de vez en cuando; si deja de
   capturar, revisa la estructura en `extension/interceptor.js`
   (`extractTweets`).
